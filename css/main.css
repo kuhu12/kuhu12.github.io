@@ -29,6 +29,7 @@ body {
 	font-family: 'Roboto Condensed', sans-serif;
 	display: block;
 	margin: auto;
+	padding-top: 50px;
 	padding-bottom: 50px;
 }
 #source{
@@ -39,16 +40,20 @@ body {
 	padding-bottom: 30px;
 }
 
-div.tooltip{ 
-	position: absolute;			
-	color: #222;			
-	width: 170px;					
-	height: auto;					
-	padding: 10px;				
-	font: 12px Roboto Condensed;	
-	background-color: #fff;	
-	border: 2px;	
+div.tooltip{
+	position: absolute;
+	color: #222;
+	width: 170px;
+	height: auto;
+	padding: 10px;
+	font: 12px Roboto Condensed;
+	background-color: #fff;
+	border: 2px;
 	border:1px solid rgba(0,0,0,0.5);
-	pointer-events: none;	
-	box-shadow: 2px 2px 2px rgba(169,169,169,0.5);  
+	pointer-events: none;
+	box-shadow: 2px 2px 2px rgba(169,169,169,0.5);
+}
+
+.legendLinear{
+	font-size: 14px;
 }

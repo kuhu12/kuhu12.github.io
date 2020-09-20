@@ -1,6 +1,6 @@
 //Initialize SVG
 	let w = 1200;
-  	let h = 600;
+  	let h = 800;
 
 	let svg = d3.select("#map")
 		.append("svg")
@@ -8,7 +8,8 @@
 		.attr("height", h)
 		.style("background", "#fff");
 
-	let g = svg.append("g");
+	let g = svg.append("g")
+				.attr("class", "map")
 
 
 	//Initialize Color Scale
@@ -24,35 +25,35 @@
     }
 
     //Initialize Map Scale
-    const projection = d3.geoAlbers();
-
-	const  scaleBar = d3.geoScaleBar()
-	    .projection(projection)
-	    .size([w, h])
-		.left(.829)
-		.top(0.85)
- 		.units(d3.geoScaleMiles)
-		.label("Miles") // The label on top of the scale bar
-	    .labelAnchor("middle")
-	    .tickFormat(d3.format(","));
-  
-  	svg.append("g")
-      .call(scaleBar);
+    // const projection = d3.geoAlbers();
+	//
+	// const  scaleBar = d3.geoScaleBar()
+	//     .projection(projection)
+	//     .size([w, h])
+	// 	.left(.829)
+	// 	.top(0.85)
+ 	// 	.units(d3.geoScaleMiles)
+	// 	.label("Miles") // The label on top of the scale bar
+	//     .labelAnchor("middle")
+	//     .tickFormat(d3.format(","));
+	//
+  	// svg.append("g")
+    //   .call(scaleBar);
 
 
 	//Initialize GOP Scale Legend
 	svg.append("g")
 	  .attr("class", "legendLinear")
-	  .attr("transform", "translate(850,550)");
+	  .attr("transform", "translate(300,30)");
 
 	var legendLinear = d3.legendColor()
 	  .shapeWidth(45)
-	  .shapeHeight(8)
-	  .shapePadding(0.8)
-	  .labels(["0",'0.25','0.5','0.75','1'])
+	  .shapeHeight(10)
+	  .shapePadding(1)
+	  .labels(["10", "20","30","40","50","60","70","80","90","100"])
 	  .labelFormat(d3.format(""))
 	  .title('GOP Percentage')
-	  .cells(5)
+	  .cells(10)
 	  .orient('horizontal')
 	  .scale(color_scheme);
 
@@ -60,48 +61,73 @@
 	  .call(legendLinear);
 
 	//Initialize Flows Legend
-	var ordinal = d3.scaleOrdinal()
-	  .domain(["Inbound Migration", "Outbound Migration"])
-	  .range(["#d65200","#36ab91"]);
+	// var ordinal = d3.scaleOrdinal()
+	//   .domain(["Inbound Migration", "Outbound Migration"])
+	//   .range(["#d65200","#36ab91"]);
 
-	svg.append("g")
-	  .attr("class", "legendOrdinal")
-	  .attr("transform", "translate(850,450)");
+	// svg.append("g")
+	//   .attr("class", "legendOrdinal")
+	//   .attr("transform", "translate(850,450)");
 
-	var legendOrdinal = d3.legendColor()
-	  .shape("path", d3.symbol().type(d3.symbolSquare).size(150)())
-	  .title('Migration Links')
-	  .shapePadding(10)
-	  .scale(ordinal);
+	// d3.select('#selectionFlows')
+	// 	.attr("transform", "translate(850,450)");
 
-	svg.select(".legendOrdinal")
-	  .call(legendOrdinal);
+	// var checkbox = d3.select("#maincontainer")
+	// 	.append("div")
+	// 	.attr("class", "selectionFlows")
+	// 	.append('input').attr('type','checkbox');
+	//
+	// checkbox.html()
 
-	//Initialize North Arrow
-	svg.append("svg:image")
-		.attr('x', 1020)
-		.attr('y', 420)
-		.attr('width', 60)
-		.attr('height', 80)
-		.attr("xlink:href", "data/northarrow.svg")
-	
+	var selectFlows = svg.append('g')
+		.attr('class','selectFlows')
+		.attr("transform", "translate(850,450)")
+
+	selectFlows.append("foreignObject")
+		.attr("width", 100)
+		.attr("height", 100)
+		.append("xhtml:body")
+		.html("<form><input type=checkbox id=check /></form>")
+		.on("click", function(d, i){
+			console.log(svg.select("#check").node().checked);
+		});
+
+
+
+	// var legendOrdinal = d3.legendColor()
+	//   .shape("path", d3.symbol().type(d3.symbolSquare).size(150)())
+	//   .title('Migration Links')
+	//   .shapePadding(10)
+	//   .scale(ordinal);
+	//
+	// svg.select(".legendOrdinal")
+	//   .call(legendOrdinal);
+
+	// //Initialize North Arrow
+	// svg.append("svg:image")
+	// 	.attr('x', 1020)
+	// 	.attr('y', 420)
+	// 	.attr('width', 60)
+	// 	.attr('height', 80)
+	// 	.attr("xlink:href", "data/northarrow.svg")
+
 	//Initialize Tooltip
 	var tooltip = d3.select("#maincontainer")
-		.append("div")	
-		.attr("class", "tooltip")       
+		.append("div")
+		.attr("class", "tooltip")
 		.style("opacity", 0);
 
     var tooltipLinks = d3.select("#maincontainer")
-		.append("div")	
-		.attr("class", "tooltip")       
+		.append("div")
+		.attr("class", "tooltip")
 		.style("opacity", 0);
 
 	////////////////////////////////////////////////////////////
-	//////////////Utility Functions ///////////////////////////				
-	////////////////////////////////////////////////////////////	
+	//////////////Utility Functions ///////////////////////////
+	////////////////////////////////////////////////////////////
 
-	let path = d3.geoPath();  
-	let isClicked = false; 
+	let path = d3.geoPath();
+	let isClicked = false;
 	let lineSize = d3.scaleLog().range([1,10]).domain([19, 37393]);
 	let links;
 	const linkedByIndex = {};
@@ -128,7 +154,7 @@
 
 	function getExemptions(a,b){
 		let Inbound = linkedByIndex[`${a},${b}`];
-		let Outbound = linkedByIndex[`${b},${a}`]; 
+		let Outbound = linkedByIndex[`${b},${a}`];
 		let exemptions = [checkUndefined(Inbound),checkUndefined(Outbound)];
 		return exemptions;
 	}
@@ -154,8 +180,8 @@
 
 
 	////////////////////////////////////////////////////////////
-	//////////////// Main Function /////////////////////////////			
-	////////////////////////////////////////////////////////////	
+	//////////////// Main Function /////////////////////////////
+	////////////////////////////////////////////////////////////
 
 
 
@@ -172,7 +198,7 @@
     	// Preparing nodes and links
     	const countiesGeo = us.objects.counties.geometries;
     	links = flows;
-    	
+
     	for (const i in nodes) { // Loop through  data countyid
 			for (const j in countiesGeo) { // Loop through countiesGeo
 				if (nodes[i].fips === countiesGeo[j].id) { // If ids match
@@ -187,17 +213,18 @@
 			}
 		}
 
-		
+
 	  	flows.forEach(d => {
 	    	linkedByIndex[`${d.fips_ori},${d.fips_des}`] = d.exemptions;
 	  	});
-  		
-		
+
+
 		// Creating Counties
 	    let counties =	g.selectAll('path')
 	    	.data(topojson.feature(us, us.objects.counties).features)
 			.enter().append("path")
 			.attr("class", "counties")
+			.attr("transform", "translate(0,50)")
 			.attr("id", function(d) { return 'county' + d.id; })
 			.attr("d", path)
 			.attr("fill", d => color_county(d.properties['gop_pct_2016']))
@@ -223,11 +250,12 @@
   			g.selectAll(".goingline")
 			.attr("stroke-dasharray", 0)
 			.remove()
-  
+
 			g.selectAll(".goingline")
 			.data(data[0])
 			.enter().append("path")
 			.attr("class", "goingline")
+				.attr("transform", "translate(0,50)")
 			.attr("d", function(d){
 				let cId = d.fips_des;
 				let theCounty = d3.select("#county" + cId);
@@ -237,7 +265,7 @@
 				let destinationx = path.centroid(togetCentroid)[0];
 				let destinationy = path.centroid(togetCentroid)[1];
 
-				let dx = destinationx - selectedx, 
+				let dx = destinationx - selectedx,
 					dy = destinationy - selectedy,
 					dr = Math.sqrt(dx * dx + dy * dy);
 
@@ -246,27 +274,29 @@
 
 			})
 			.call(transition)
-			.attr('stroke-width',function(d){return lineSize(parseInt(d.exemptions));})
+			.attr('stroke-width',2)
+			// .attr('stroke-width',function(d){return lineSize(parseInt(d.exemptions));})
 			.attr('stroke','#36ab91')
 			.attr("fill", "none")
 	  		.attr("opacity", 0.7)
 	  		.attr("stroke-linecap", "round")
-	  		
+
 
 	  		//Function for creating links
 	  		g.selectAll(".comingline")
 			.attr("stroke-dasharray", 0)
 			.remove()
-  
+
 			g.selectAll(".comingline")
 			.data(data[1])
 			.enter().append("path")
 			.attr("class", "comingline")
+				.attr("transform", "translate(0,50)")
 			.attr("d", function(d){
 				let cId = d.fips_ori;
 				let theCounty = d3.select("#county" + cId);
 				let togetCentroid = theCounty._groups[0][0].__data__;
-				
+
 
 				let originx = path.centroid(togetCentroid)[0];
 				let originy = path.centroid(togetCentroid)[1];
@@ -280,7 +310,8 @@
 
 			})
 			.call(transition)
-			.attr('stroke-width',function(d){return lineSize(parseInt(d.exemptions)); })
+			.attr('stroke-width', 2)
+			// .attr('stroke-width',function(d){return lineSize(parseInt(d.exemptions)); })
 			.attr('stroke','#d65200')
 			.attr("fill", "none")
 	  		.attr("opacity", 0.7)
@@ -299,14 +330,14 @@
 	  				const connectOpacity = (connectId.includes(o.id)) ? 1 : 0.1;
 	    			this.setAttribute('fill-opacity', connectOpacity);
 	     			return connectOpacity;
-	    	}) 
+	    	})
 	    	counties.on('mouseover',function(o){
 	    		if(connectId.includes(o.id)){
-	    			tooltipLinks.transition()    
-		            		.duration(200)    
-		            		.style("opacity", 1); 
-		     
-		            		var mouse = d3.mouse(d3.select('.counties').node()); 
+	    			tooltipLinks.transition()
+		            		.duration(200)
+		            		.style("opacity", 1);
+
+		            		var mouse = d3.mouse(d3.select('.counties').node());
 		            		if(chosen.id === o.id){
 		            			var Migrants = findConnectedCounty(o.id);
 		            			var cMigrants = countMigrants(Migrants);
@@ -319,9 +350,9 @@
 		            		}
 
 	    		}else{
-		    			 tooltipLinks.transition()    
-		            	.duration(300)    
-		            	.style("opacity", 0); 
+		    			 tooltipLinks.transition()
+		            	.duration(300)
+		            	.style("opacity", 0);
 		    		}
 	    	})
 
@@ -344,36 +375,36 @@
 		//Mouseover function on county
 	    function fade(opacity, state){
 	    	return d => {
-	    		
+
 	    		if(!isClicked){
 		    		if(!($.isEmptyObject(d.properties)))
 		    		{
 			    		if(state == 'over'){
-			    			tooltip.transition()    
-			            		.duration(200)    
-			            		.style("opacity", 0.8);  
+			    			tooltip.transition()
+			            		.duration(200)
+			            		.style("opacity", 0.8);
 
-			            	
+
 			            	let Migrants = findConnectedCounty(d.id);
 			            	let cMigrants = countMigrants(Migrants);
-			            	let mouse = d3.mouse(d3.select('.counties').node()); 
+			            	let mouse = d3.mouse(d3.select('.counties').node());
 			            	let goppct = parseFloat(d.properties.gop_pct_2016).toFixed(2);
-			            	tooltip.html("<font size=3>" + "<b>" + d.properties.namelsad + "</b>" + "</font>" + "<br/>" + d.properties.state + "<br/>" + "<br/>" + " GOP Percentage " + "&nbsp; &nbsp;&nbsp; &nbsp; &nbsp;" + goppct + "<br/>" + "Population " + "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; " + d.properties.pop_16 + "<br/>" + "Outbound Migrants" + "&nbsp; &nbsp; &nbsp;" + cMigrants[0] + "<br/>" + "Inbound Migrants" + "&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;" + cMigrants[1] ).style("left", (mouse[0]+ 30) + "px").style("top", (mouse[1] - 80) + "px");   
+			            	tooltip.html("<font size=3>" + "<b>" + d.properties.namelsad + "</b>" + "</font>" + "<br/>" + d.properties.state + "<br/>" + "<br/>" + " GOP Percentage " + "&nbsp; &nbsp;&nbsp; &nbsp; &nbsp;" + goppct + "<br/>" + "Population " + "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; " + d.properties.pop_16 + "<br/>" + "Outbound Migrants" + "&nbsp; &nbsp; &nbsp;" + cMigrants[0] + "<br/>" + "Inbound Migrants" + "&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;" + cMigrants[1] ).style("left", (mouse[0]+ 30) + "px").style("top", (mouse[1] - 80) + "px");
 			    		} else{
-			    			 tooltip.transition()    
-			            	.duration(300)    
-			            	.style("opacity", 0); 
+			    			 tooltip.transition()
+			            	.duration(300)
+			            	.style("opacity", 0);
 			    		}
 
 			    		counties.style('fill-opacity', function(o){
 			    			const thisOpacity = isConnected(d.id, o.id) ? 1: opacity;
 			    			this.setAttribute('fill-opacity', thisOpacity);
 			     			return thisOpacity;
-			    		})   	
-					}    	
+			    		})
+					}
 				}
 			}
-	    	
+
 	    }
 
 
@@ -381,6 +412,7 @@
 		svg.append("path")
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 	      .attr("class", "states")
+			.attr("transform", "translate(0,50)")
 	      .attr('stroke', 'black')
 	      .attr('fill','none')
 	      .attr('stroke-width', 1)
@@ -388,6 +420,8 @@
 
 	    svg.append("path")
 	      .attr("d", path(topojson.feature(us, us.objects.nation)))
+			.attr('class','nation')
+			.attr("transform", "translate(0,50)")
 	      .attr('fill','none')
 	      .attr('stroke', 'black')
 	      .attr('stroke-width', 1);
